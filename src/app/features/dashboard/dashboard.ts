@@ -1,12 +1,16 @@
 import { Component, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { NotificacionService } from '../../core/ui/notificacion.service';
+import { Boton } from '../../shared/boton/boton';
 
 interface ItemMenu {
   label: string;
   ruta: string;
-  permiso: string;
+  // Sin permiso => visible para cualquier usuario autenticado (igual que
+  // GET /permisos en el backend, que solo exige requireAuth, ninguna
+  // requirePermiso puntual).
+  permiso?: string;
 }
 
 // Qué entra al sidebar lo decide el backend (get_matriz_permisos), esta lista
@@ -16,11 +20,12 @@ const MENU: ItemMenu[] = [
   { label: 'Roles', ruta: '/roles', permiso: 'roles.read' },
   { label: 'Sistemas', ruta: '/sistemas', permiso: 'sistemas.read' },
   { label: 'Configuración', ruta: '/configuraciones', permiso: 'sistemas.read' },
+  { label: 'Permisos', ruta: '/permisos' },
 ];
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink],
+  imports: [RouterLink, RouterOutlet, Boton],
   template: `
     <div class="flex h-screen bg-gray-50">
       <aside class="w-56 shrink-0 border-r border-gray-200 bg-white p-4">
@@ -47,7 +52,13 @@ const MENU: ItemMenu[] = [
             </svg>
           </div>
 
-          <button type="button" class="ml-auto flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100"
+          <a routerLink="/cambiar-password" class="ml-auto text-sm text-gray-500 hover:text-gray-700 hover:underline">
+            Cambiar contraseña
+          </a>
+
+          <app-boton variante="secundario" type="button" (click)="cerrarSesion()">Cerrar sesión</app-boton>
+
+          <button type="button" class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100"
                   aria-label="Notificaciones">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
@@ -55,8 +66,8 @@ const MENU: ItemMenu[] = [
           </button>
         </header>
 
-        <main class="flex flex-1 items-center justify-center text-3xl font-semibold text-gray-300">
-          background
+        <main class="flex flex-1 flex-col overflow-auto">
+          <router-outlet />
         </main>
       </div>
     </div>
@@ -65,10 +76,15 @@ const MENU: ItemMenu[] = [
 export class Dashboard {
   protected auth = inject(AuthService);
   private notificacion = inject(NotificacionService);
+  private router = inject(Router);
 
-  protected menuVisible = computed(() => MENU.filter((item) => this.auth.tienePermiso(item.permiso)));
+  protected menuVisible = computed(() => MENU.filter((item) => !item.permiso || this.auth.tienePermiso(item.permiso)));
 
   constructor() {
     this.notificacion.toast(`Bienvenido, ${this.auth.nombre()}`);
+  }
+
+  protected cerrarSesion(): void {
+    this.auth.logout().subscribe(() => this.router.navigate(['/login']));
   }
 }

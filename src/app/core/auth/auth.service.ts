@@ -1,9 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { tap, throwError } from 'rxjs';
+import { tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-const AUTH_FLAG = 'mm_auth';
 const EMPRESA_KEY = 'mm_empresa_id';
 
 export interface RegistroPayload {
@@ -12,6 +11,11 @@ export interface RegistroPayload {
   admin_nombre: string;
   admin_email: string;
   admin_password: string;
+}
+
+export interface EmpresaDisponible {
+  public_id: string;
+  nombre: string;
 }
 
 interface MeResponse {
@@ -24,18 +28,21 @@ interface MeResponse {
 export class AuthService {
   private http = inject(HttpClient);
 
-  // Flag de UX para el guard; la cookie httpOnly es la autoridad real.
-  isAuthenticated = signal(localStorage.getItem(AUTH_FLAG) === '1');
-
   // Se cargan con GET /auth/me (usa get_matriz_permisos() de la base de datos:
   // las reglas de qué se muestra las define el backend, no el frontend).
   nombre = signal('');
   permisos = signal<string[]>([]);
 
-  // POST /registro crea una empresa nueva por llamada (multi-tenant real, no demo).
-  // El public_id no se hardcodea: se guarda acá tras registrar y se reusa para loguear.
+  // El public_id de la empresa activa en este navegador. Se completa de 3 formas:
+  // POST /registro (crea empresa nueva), selección manual cuando un email
+  // tiene cuentas en más de una empresa, o auto-selección cuando tiene solo una.
   get empresaId(): string | null {
     return localStorage.getItem(EMPRESA_KEY);
+  }
+
+  // Escape hatch: si el email pertenece a otra empresa, hay que poder re-resolver.
+  olvidarEmpresa(): void {
+    localStorage.removeItem(EMPRESA_KEY);
   }
 
   tienePermiso(clave: string): boolean {
@@ -48,13 +55,21 @@ export class AuthService {
       .pipe(tap(({ empresa_public_id }) => localStorage.setItem(EMPRESA_KEY, empresa_public_id)));
   }
 
+  // Un mismo email puede tener cuenta en varias empresas (el login se valida
+  // por empresa). Se llama cuando todavía no hay empresaId cacheado.
+  buscarEmpresas(email: string) {
+    return this.http.get<EmpresaDisponible[]>(`${environment.apiUrl}/auth/empresas`, { params: { email } });
+  }
+
+  // Fast path: ya sabemos a qué empresa pertenece este navegador.
   login(email: string, password: string) {
-    if (!this.empresaId) {
-      return throwError(() => new Error('No hay empresa registrada en este navegador. Registrate primero.'));
-    }
+    return this.loginEnEmpresa(this.empresaId!, email, password);
+  }
+
+  loginEnEmpresa(empresaId: string, email: string, password: string) {
     return this.http
-      .post<{ ok: boolean }>(`${environment.apiUrl}/empresas/${this.empresaId}/auth/login`, { email, password })
-      .pipe(tap(() => this.setAuthenticated(true)));
+      .post<{ ok: boolean }>(`${environment.apiUrl}/empresas/${empresaId}/auth/login`, { email, password })
+      .pipe(tap(() => localStorage.setItem(EMPRESA_KEY, empresaId)));
   }
 
   cargarMe() {
@@ -69,16 +84,21 @@ export class AuthService {
   logout() {
     return this.http
       .post<{ ok: boolean }>(`${environment.apiUrl}/empresas/${this.empresaId}/auth/logout`, {})
-      .pipe(tap(() => this.setAuthenticated(false)));
+      .pipe(tap(() => this.limpiarSesion()));
   }
 
-  setAuthenticated(value: boolean): void {
-    this.isAuthenticated.set(value);
-    if (value) localStorage.setItem(AUTH_FLAG, '1');
-    else localStorage.removeItem(AUTH_FLAG);
-    if (!value) {
-      this.nombre.set('');
-      this.permisos.set([]);
-    }
+  // El backend limpia la cookie tras cambiar la contraseña (fuerza relogin).
+  cambiarPassword(passwordActual: string, passwordNueva: string) {
+    return this.http
+      .put<{ ok: boolean; mensaje: string }>(`${environment.apiUrl}/empresas/${this.empresaId}/auth/password`, {
+        password_actual: passwordActual,
+        password_nueva: passwordNueva,
+      })
+      .pipe(tap(() => this.limpiarSesion()));
+  }
+
+  private limpiarSesion(): void {
+    this.nombre.set('');
+    this.permisos.set([]);
   }
 }

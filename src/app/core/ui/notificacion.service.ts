@@ -22,4 +22,16 @@ export class NotificacionService {
       timerProgressBar: true,
     });
   }
+
+  async confirmar(mensaje: string, titulo = '¿Estás seguro?'): Promise<boolean> {
+    const resultado = await Swal.fire({
+      icon: 'warning',
+      title: titulo,
+      text: mensaje,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, continuar',
+      cancelButtonText: 'Cancelar',
+    });
+    return resultado.isConfirmed;
+  }
 }

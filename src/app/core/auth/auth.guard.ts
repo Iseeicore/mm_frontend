@@ -7,16 +7,12 @@ export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  if (!auth.isAuthenticated()) {
-    router.navigate(['/login']);
-    return false;
-  }
-
-  // Permisos frescos en cada entrada a zona protegida (incluye refresh de página).
+  // La cookie httpOnly es la única autoridad real — se valida contra el
+  // backend en cada entrada a zona protegida (incluye refresh de página),
+  // sin cachear un flag local que pueda quedar desincronizado.
   return auth.cargarMe().pipe(
     map(() => true),
     catchError(() => {
-      auth.setAuthenticated(false);
       router.navigate(['/login']);
       return of(false);
     })
