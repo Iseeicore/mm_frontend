@@ -14,6 +14,7 @@ import { Permisos } from './features/permisos/permisos';
 import { Tiendas } from './features/tiendas/tiendas';
 import { Almacenes } from './features/almacenes/almacenes';
 import { Productos } from './features/productos/productos';
+import { Movimientos } from './features/movimientos/movimientos';
 
 export const routes: Routes = [
   {
@@ -30,6 +31,7 @@ export const routes: Routes = [
       { path: 'tiendas', component: Tiendas },
       { path: 'almacenes', component: Almacenes },
       { path: 'productos', component: Productos },
+      { path: 'movimientos', component: Movimientos },
     ],
   },
   { path: 'login', component: Login },

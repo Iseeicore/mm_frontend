@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { CrudService } from '../../shared/crud/crud.service';
 
 export interface Producto {
@@ -30,7 +31,23 @@ export interface ProductoPayload {
   precio_venta_paquete?: number;
 }
 
+export interface StockUbicacion {
+  public_id: string;
+  nombre: string;
+  stock_actual: number;
+  stock_minimo: number | null;
+  fecha_actualizacion: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProductoService extends CrudService<Producto, ProductoPayload> {
   protected recurso = 'productos';
+
+  // `base` de CrudService es private, no accesible desde acá — se arma la URL
+  // con `this.recurso` para no hardcodear 'productos' dos veces.
+  stock(publicId: string) {
+    return this.http.get<{ almacenes: StockUbicacion[]; tiendas: StockUbicacion[] }>(
+      `${environment.apiUrl}/${this.recurso}/${publicId}/stock`,
+    );
+  }
 }
