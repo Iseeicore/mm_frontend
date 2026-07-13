@@ -11,6 +11,7 @@ import { Roles } from './features/roles/roles';
 import { Sistemas } from './features/sistemas/sistemas';
 import { Configuraciones } from './features/configuraciones/configuraciones';
 import { Permisos } from './features/permisos/permisos';
+import { Tiendas } from './features/tiendas/tiendas';
 
 export const routes: Routes = [
   {
@@ -24,6 +25,7 @@ export const routes: Routes = [
       { path: 'sistemas', component: Sistemas },
       { path: 'configuraciones', component: Configuraciones },
       { path: 'permisos', component: Permisos },
+      { path: 'tiendas', component: Tiendas },
     ],
   },
   { path: 'login', component: Login },
