@@ -21,6 +21,7 @@ const MENU: ItemMenu[] = [
   { label: 'Sistemas', ruta: '/sistemas', permiso: 'sistemas.read' },
   { label: 'Configuración', ruta: '/configuraciones', permiso: 'sistemas.read' },
   { label: 'Tiendas', ruta: '/tiendas', permiso: 'tiendas.read' },
+  { label: 'Almacenes', ruta: '/almacenes', permiso: 'almacenes.read' },
   { label: 'Permisos', ruta: '/permisos' },
 ];
 
