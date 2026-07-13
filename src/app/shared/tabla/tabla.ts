@@ -21,7 +21,7 @@ export interface ColumnaTabla<T> {
             @for (columna of columnas(); track columna.clave) {
               <th class="px-3 py-2 font-medium">{{ columna.titulo }}</th>
             }
-            @if (puedeEditar() || puedeEliminar()) {
+            @if (puedeEditar() || puedeEliminar() || puedeVerDetalle()) {
               <th class="px-3 py-2 font-medium">Acciones</th>
             }
           </tr>
@@ -32,8 +32,11 @@ export interface ColumnaTabla<T> {
               @for (columna of columnas(); track columna.clave) {
                 <td class="px-3 py-2 text-gray-700">{{ fila[columna.clave] }}</td>
               }
-              @if (puedeEditar() || puedeEliminar()) {
+              @if (puedeEditar() || puedeEliminar() || puedeVerDetalle()) {
                 <td class="flex gap-2 px-3 py-2">
+                  @if (puedeVerDetalle()) {
+                    <app-boton variante="secundario" (click)="verDetalle.emit(fila)">{{ etiquetaVerDetalle() }}</app-boton>
+                  }
                   @if (puedeEditar()) {
                     <app-boton variante="secundario" (click)="editar.emit(fila)">Editar</app-boton>
                   }
@@ -67,11 +70,14 @@ export class Tabla<T> {
   clave = input.required<(fila: T) => string | number>();
   puedeEditar = input(false);
   puedeEliminar = input(false);
+  puedeVerDetalle = input(false);
+  etiquetaVerDetalle = input('Ver');
   paginaActual = input(1);
   totalPaginas = input(1);
 
   editar = output<T>();
   eliminar = output<T>();
+  verDetalle = output<T>();
   anterior = output<void>();
   siguiente = output<void>();
 }
