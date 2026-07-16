@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { CrudService } from '../../shared/crud/crud.service';
+import { environment } from '../../../environments/environment';
+import { CrudService, Paginado } from '../../shared/crud/crud.service';
+import { ProductoDeUbicacion } from '../productos/producto.service';
 
 export interface Almacen {
   public_id: string;
@@ -16,4 +18,13 @@ export interface Almacen {
 @Injectable({ providedIn: 'root' })
 export class AlmacenService extends CrudService<Almacen> {
   protected recurso = 'almacenes';
+
+  // `base` de CrudService es private, no accesible desde acá — se arma la URL
+  // a mano con `this.recurso` para no repetir el literal 'almacenes'.
+  productos(almacenId: string, page = 1, limit = 20) {
+    return this.http.get<Paginado<ProductoDeUbicacion>>(
+      `${environment.apiUrl}/${this.recurso}/${almacenId}/productos`,
+      { params: { page, limit } },
+    );
+  }
 }

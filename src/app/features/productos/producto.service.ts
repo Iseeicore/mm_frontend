@@ -39,6 +39,21 @@ export interface StockUbicacion {
   fecha_actualizacion: string;
 }
 
+// Shape de ProductoStockNormalizador en bases-api (GET /almacenes/:id/productos
+// y GET /tiendas/:id/productos) — misma forma para ambos recursos, se define
+// una sola vez acá (dominio "producto") y la reusan almacen.service.ts / tienda.service.ts.
+export interface ProductoDeUbicacion {
+  producto_public_id: string;
+  producto_nombre: string;
+  precio_venta_unidad: number;
+  precio_venta_paquete: number | null;
+  unidades_por_paquete: number;
+  stock_actual: number;
+  paquetes_completos: number;
+  stock_minimo: number | null;
+  fecha_actualizacion: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProductoService extends CrudService<Producto, ProductoPayload> {
   protected recurso = 'productos';

@@ -15,6 +15,7 @@ import { Tiendas } from './features/tiendas/tiendas';
 import { Almacenes } from './features/almacenes/almacenes';
 import { Productos } from './features/productos/productos';
 import { ProductoStock } from './features/productos/producto-stock';
+import { ProductosUbicacion } from './features/productos/productos-ubicacion';
 import { Movimientos } from './features/movimientos/movimientos';
 
 export const routes: Routes = [
@@ -30,7 +31,9 @@ export const routes: Routes = [
       { path: 'configuraciones', component: Configuraciones },
       { path: 'permisos', component: Permisos },
       { path: 'tiendas', component: Tiendas },
+      { path: 'tiendas/:id/productos', component: ProductosUbicacion, data: { tipo: 'tienda' } },
       { path: 'almacenes', component: Almacenes },
+      { path: 'almacenes/:id/productos', component: ProductosUbicacion, data: { tipo: 'almacen' } },
       { path: 'productos', component: Productos },
       { path: 'productos/:id/stock', component: ProductoStock },
       { path: 'movimientos', component: Movimientos },

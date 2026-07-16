@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { CrudListBase } from '../../shared/crud/crud-list.base';
 import { Tabla, ColumnaTabla } from '../../shared/tabla/tabla';
@@ -50,8 +51,10 @@ const COLUMNAS: ColumnaTabla<Almacen>[] = [
         <app-tabla [columnas]="columnas" [filas]="filas()" [clave]="idDe"
                    [puedeEditar]="auth.tienePermiso('almacenes.update')"
                    [puedeEliminar]="auth.tienePermiso('almacenes.delete')"
+                   [puedeVerDetalle]="auth.tienePermiso('almacenes.read')" etiquetaVerDetalle="Ver productos"
                    [paginaActual]="pagina()" [totalPaginas]="totalPaginas()"
                    (editar)="abrirEditar($event)" (eliminar)="eliminar($event)"
+                   (verDetalle)="verProductos($event)"
                    (anterior)="paginaAnterior()" (siguiente)="paginaSiguiente()" />
       }
     </div>
@@ -61,11 +64,16 @@ export class Almacenes extends CrudListBase<Almacen> implements OnInit {
   protected servicio = inject(AlmacenService);
   protected auth = inject(AuthService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   protected columnas = COLUMNAS;
 
   ngOnInit(): void {
     this.cargar();
+  }
+
+  protected verProductos(almacen: Almacen): void {
+    this.router.navigate(['/almacenes', almacen.public_id, 'productos']);
   }
 
   protected form = this.fb.nonNullable.group({
