@@ -19,7 +19,9 @@ Estado del trabajo de integrar en `bases-front` los recursos que `bases-api` ya 
 | 2 | `almacenes` | ✅ Cerrado | `d4f80e7` | Réplica 1:1 de tiendas (backend idéntico salvo nombres/prefijos) |
 | 3 | `productos` | ✅ Cerrado (solo CRUD base) | `c42389b` | Sin stock/precio/historial en esta iteración. Bug real corregido antes del commit: `codigo_barras`/`descripcion` vacíos se mandaban como `''` en vez de `null` (chocaba contra el índice único parcial del backend) |
 | 4 | `movimientos` | ✅ Cerrado | `36563ac` | NO extiende `CrudService`/`CrudListBase` (backend solo GET/POST). 4 rondas de fixes reales: reset de ubicación stale al cambiar tipo, tests de `crear()` faltantes, label "origen" mal puesto en `entrada`, select de origen sin filtrar por stock real |
-| 5 | `ventas` | ⏳ Siguiente | — | Alta+lectura, maestro-detalle (cabecera + líneas). Mismo patrón sin CRUD completo que `movimientos`. Verificar contrato con `bases-api/postman/movimientos-ventas.postman_collection.json` antes de asumir nada |
+| 5 | `ventas` | ✅ Cerrado | `523ab46` | Alta+lectura, maestro-detalle (cabecera + N líneas dinámicas). Mismo patrón sin CRUD completo que `movimientos`. Revisión en contexto fresco encontró y corrigió: paginación ya era la 4ta copia manual (se generalizó a `shared/paginacion/listado-paginado.ts`, migrando también `movimientos.ts` y `productos-ubicacion.ts`) y una race condition real de índice en el stock por línea (resuelta con `WeakMap` keyeado por el `FormGroup` de cada línea) |
+
+**Pipeline principal cerrado** (2026-07-16): los 5 recursos previstos (`tiendas`, `almacenes`, `productos`, `movimientos`, `ventas`) están integrados. Lo que sigue son los pendientes explícitos de abajo y trabajo intermedio nuevo que vaya surgiendo.
 
 ## Trabajo intermedio (no era parte del pipeline original, surgió en el camino)
 
@@ -28,6 +30,7 @@ Estado del trabajo de integrar en `bases-front` los recursos que `bases-api` ya 
 | Skill `estilo-neomorfico` | Creada, no aplicada todavía | — (`.claude/` está gitignored, no se commitea) | Define el mecanismo de sombra dual + color semántico para Tailwind v4. Deliberadamente no aplicada a ningún recurso todavía para no romper consistencia visual con el resto del dashboard (que sigue con estilo plano) |
 | Consulta de stock por producto | ✅ Cerrado | `9ad119b` | Pantalla de solo lectura (`GET /productos/:id/stock`) en `/productos/:id/stock`, accedida con un botón "Ver stock" nuevo en la lista de productos. Requirió extender `<app-tabla>` (componente compartido) con un tercer slot genérico de acción (`puedeVerDetalle`/`etiquetaVerDetalle`/`verDetalle`), verificado retrocompatible con las otras 8 vistas que ya lo usan |
 | Listado de productos por almacén/tienda | ✅ Cerrado | `f0d2ffe` | Gap de Fase 1 (ver "Pendientes" más abajo) que `bases-api` destrabó en su commit `6f07f78`. Un solo componente `ProductosUbicacion` parametrizado por route `data.tipo` en vez de dos casi idénticos, reusa el tercer slot de `<app-tabla>` ("Ver productos") en almacenes/tiendas. Revisión en contexto fresco encontró y corrigió: guard de página fuera de rango faltante, URL de sub-recurso hardcodeada en vez de `this.recurso`, tipo duplicado (`TipoUbicacion` ya existía en `movimiento.service.ts`) |
+| Paginación compartida para listados no-CRUD | ✅ Cerrado | `523ab46` | `shared/paginacion/listado-paginado.ts` (`crearListadoPaginado<T>`, composición por función, sin herencia). Se venía marcando desde `productos-ubicacion.ts` como deuda a resolver "si aparece una 4ta copia" — apareció con `ventas`, se generalizó de una vez en `movimientos.ts`, `productos-ubicacion.ts` y `ventas.ts`. `CrudListBase` no se tocó, sigue siendo la base correcta para recursos con CRUD completo |
 
 ## Pendientes explícitos (fuera de alcance por ahora, con motivo)
 
@@ -44,7 +47,12 @@ Estado del trabajo de integrar en `bases-front` los recursos que `bases-api` ya 
 - **Identificador**: `public_id` (UUID) salvo `configuracion` (id numérico) y `permiso` (string `clave`).
 - **La revisión de código en contexto fresco no sustituye probar la app real** — confirmado en `movimientos`, donde 2 bugs reales solo aparecieron al usar el formulario en el navegador, no en 2 rondas previas de revisión de código.
 - Antes de proponer una vista nueva que combine dos recursos (ej. "productos de este almacén"), verificar primero si el backend expone esa dirección de consulta — no asumir que porque existe A→B también existe B→A.
+- **Umbral de "4ta copia" para generalizar**: cuando un comentario `ponytail:` marca una duplicación con una condición explícita para resolverla ("cuando aparezca una 4ta copia"), tratarla como una decisión ya tomada, no una sugerencia a re-evaluar — al cruzarse el umbral en `ventas`, se generalizó sin volver a preguntar si valía la pena.
+- **`WeakMap` keyeado por `FormGroup`/`AbstractControl`** es más robusto que un array paralelo indexado por posición para asociar datos auxiliares no persistidos (ej. stock) a líneas dinámicas de un `FormArray` — sobrevive agregar/quitar/reordenar sin sincronización manual. Patrón a reusar si aparece otro formulario con líneas dinámicas.
 
 ## Próximo paso
 
-Retomar con **recurso #5: `ventas`** siguiendo el procedimiento fijo de arriba, empezando por el gate de `sql-schema-gate` (preguntar qué cambió en la BD) y `observador-backend` (confirmar contrato real, usando `bases-api/postman/movimientos-ventas.postman_collection.json` como referencia). El gate de BD ya se corrió una vez (2026-07-16, sin cambios en el esquema de ventas) — releer si pasó tiempo o si el usuario avisa que algo cambió.
+Pipeline principal cerrado. Lo que sigue, en orden de mención por el usuario o de aparición:
+1. Pendientes explícitos de arriba (stock-bajo por ubicación, ajuste de precio, historial de precios, ajuste absoluto de stock) — ninguno tiene fecha, retomar cuando el usuario los priorice.
+2. Deuda técnica pendiente en `deuda-tecnica/agents.md` (ver ledger) — en particular el límite fijo `listar(1,100)` en `movimientos.ts`/`ventas.ts`, que no escala si esos catálogos crecen.
+3. Sincronizar `Manual_Minimarket_v1.docx` (TEMA 10/11 + HOJA 2) reflejando el cierre de `ventas` y la extracción de `listado-paginado.ts`, siguiendo `docx-frontend-sync`.
