@@ -1,6 +1,6 @@
 # Pipeline de integración frontend-backend (bases-front ↔ bases-api)
 
-Estado del trabajo de integrar en `bases-front` los recursos que `bases-api` ya expone. Se actualiza cada vez que se cierra un recurso o se toma una decisión de alcance. Última actualización: 2026-07-13.
+Estado del trabajo de integrar en `bases-front` los recursos que `bases-api` ya expone. Se actualiza cada vez que se cierra un recurso o se toma una decisión de alcance. Última actualización: 2026-07-16.
 
 ## Procedimiento fijo por recurso
 
@@ -27,10 +27,11 @@ Estado del trabajo de integrar en `bases-front` los recursos que `bases-api` ya 
 |---|---|---|---|
 | Skill `estilo-neomorfico` | Creada, no aplicada todavía | — (`.claude/` está gitignored, no se commitea) | Define el mecanismo de sombra dual + color semántico para Tailwind v4. Deliberadamente no aplicada a ningún recurso todavía para no romper consistencia visual con el resto del dashboard (que sigue con estilo plano) |
 | Consulta de stock por producto | ✅ Cerrado | `9ad119b` | Pantalla de solo lectura (`GET /productos/:id/stock`) en `/productos/:id/stock`, accedida con un botón "Ver stock" nuevo en la lista de productos. Requirió extender `<app-tabla>` (componente compartido) con un tercer slot genérico de acción (`puedeVerDetalle`/`etiquetaVerDetalle`/`verDetalle`), verificado retrocompatible con las otras 8 vistas que ya lo usan |
+| Listado de productos por almacén/tienda | ✅ Cerrado | `f0d2ffe` | Gap de Fase 1 (ver "Pendientes" más abajo) que `bases-api` destrabó en su commit `6f07f78`. Un solo componente `ProductosUbicacion` parametrizado por route `data.tipo` en vez de dos casi idénticos, reusa el tercer slot de `<app-tabla>` ("Ver productos") en almacenes/tiendas. Revisión en contexto fresco encontró y corrigió: guard de página fuera de rango faltante, URL de sub-recurso hardcodeada en vez de `this.recurso`, tipo duplicado (`TipoUbicacion` ya existía en `movimiento.service.ts`) |
 
 ## Pendientes explícitos (fuera de alcance por ahora, con motivo)
 
-- **`GET /almacenes/:id/productos` y `GET /tiendas/:id/productos`** — el usuario pidió poder ver, desde la vista de un almacén/tienda, qué productos tiene registrados. Se verificó que `bases-api` NO tiene ese endpoint (solo existe la dirección inversa, producto→ubicaciones). Armarlo solo del frontend sería un N+1 no escalable (paginar todos los productos + pedir stock de cada uno + filtrar client-side). **Requiere crear el endpoint en `bases-api` primero** (cruzar de repo, orquestar su propio `AGENTS.md`: `sql-schema-gate` + `api-conventions` + `data-normalization`). El usuario decidió explícitamente dejarlo pendiente.
+- **`GET /almacenes/:id/productos/stock-bajo` y `GET /tiendas/:id/productos/stock-bajo`** — `bases-api` ya los expone (mismo commit `6f07f78` que destrabó el listado simple), pero el frontend solo consumió la variante simple en esta iteración (decisión explícita del usuario, YAGNI). Sin UI todavía.
 - **`PATCH /productos/:id/precio`** — ajuste de precio, permiso propio `productos.adjust_price` (distinto de `productos.update`). Sin UI todavía.
 - **`GET /productos/:id/historial-precios`** — solo lectura, poblado por trigger. Sin UI todavía.
 - **`PUT /productos/:id/stock/almacenes|tiendas/:id`** — ajuste absoluto de stock (UPSERT), vía alternativa a crear un movimiento de `entrada`. Se decidió explícitamente que la pantalla de consulta de stock (`producto-stock.ts`) sea de solo lectura y no incluya esto. Sin UI todavía.
@@ -46,4 +47,4 @@ Estado del trabajo de integrar en `bases-front` los recursos que `bases-api` ya 
 
 ## Próximo paso
 
-Retomar con **recurso #5: `ventas`** siguiendo el procedimiento fijo de arriba, empezando por el gate de `sql-schema-gate` (preguntar qué cambió en la BD) y `observador-backend` (confirmar contrato real, usando `bases-api/postman/movimientos-ventas.postman_collection.json` como referencia).
+Retomar con **recurso #5: `ventas`** siguiendo el procedimiento fijo de arriba, empezando por el gate de `sql-schema-gate` (preguntar qué cambió en la BD) y `observador-backend` (confirmar contrato real, usando `bases-api/postman/movimientos-ventas.postman_collection.json` como referencia). El gate de BD ya se corrió una vez (2026-07-16, sin cambios en el esquema de ventas) — releer si pasó tiempo o si el usuario avisa que algo cambió.

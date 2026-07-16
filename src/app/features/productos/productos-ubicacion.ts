@@ -133,6 +133,11 @@ export class ProductosUbicacion implements OnInit {
       });
   }
 
+  // ponytail: paginaSiguiente/paginaAnterior/el guard de página fuera de rango
+  // de cargar() son la tercera copia literal de la misma lógica (CrudListBase
+  // y movimientos.ts ya la tienen cada uno por su lado). No se extrajo a un
+  // helper compartido acá para no tocar 3 archivos en esta iteración — subir
+  // a `deuda-tecnica` si aparece una cuarta copia.
   protected paginaSiguiente(): void {
     if (this.pagina() >= this.totalPaginas()) return;
     this.pagina.update((p) => p + 1);
