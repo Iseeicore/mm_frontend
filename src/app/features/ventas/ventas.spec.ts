@@ -14,7 +14,9 @@ import { Venta } from './venta.service';
 interface LineaVentaGroupTest {
   controls: {
     producto_id: { setValue: (v: string) => void; value: string };
-    origen_id: { setValue: (v: string) => void };
+    origen_id: { setValue: (v: string) => void; value: string };
+    origen_tipo: { value: 'almacen' | 'tienda' };
+    cantidad: { setValue: (v: number) => void; value: number };
   };
 }
 
@@ -165,6 +167,67 @@ describe('Ventas', () => {
     });
 
     expect(componente.opcionesOrigen(lineaObjetivo, 'almacen').map((o) => o.public_id)).toEqual(['alm-con-stock']);
+
+    http.verify();
+  });
+
+  it('mensajeStock avisa cuando la cantidad supera el stock del origen elegido, y se recalcula al bajarla', () => {
+    const fixture = TestBed.createComponent(Ventas);
+    const componente = fixture.componentInstance as unknown as {
+      form: { controls: { lineas: { at: (i: number) => LineaVentaGroupTest } } };
+      alCambiarProducto: (linea: LineaVentaGroupTest) => void;
+      mensajeStock: (linea: LineaVentaGroupTest) => string | null;
+    };
+    fixture.detectChanges();
+
+    const http = TestBed.inject(HttpTestingController);
+    flushCargaInicial(http);
+
+    const linea0 = componente.form.controls.lineas.at(0);
+    linea0.controls.producto_id.setValue('prod-1');
+    componente.alCambiarProducto(linea0);
+    http.expectOne(`${environment.apiUrl}/productos/prod-1/stock`).flush({
+      almacenes: [{ public_id: 'alm-1', nombre: 'Depósito', stock_actual: 5, stock_minimo: null, fecha_actualizacion: '' }],
+      tiendas: [],
+    });
+    linea0.controls.origen_id.setValue('alm-1');
+
+    linea0.controls.cantidad.setValue(8);
+    expect(componente.mensajeStock(linea0)).toBe('Superaste el stock disponible en ese origen (5).');
+
+    linea0.controls.cantidad.setValue(5);
+    expect(componente.mensajeStock(linea0)).toBeNull();
+
+    http.verify();
+  });
+
+  it('crear() no manda el request si alguna línea supera el stock del origen elegido', () => {
+    const fixture = TestBed.createComponent(Ventas);
+    const componente = fixture.componentInstance as unknown as {
+      form: { controls: { tienda_id: { setValue: (v: string) => void }; lineas: { at: (i: number) => LineaVentaGroupTest } } };
+      alCambiarProducto: (linea: LineaVentaGroupTest) => void;
+      hayErroresStock: () => boolean;
+      crear: () => void;
+    };
+    fixture.detectChanges();
+
+    const http = TestBed.inject(HttpTestingController);
+    flushCargaInicial(http);
+
+    componente.form.controls.tienda_id.setValue('tienda-1');
+    const linea0 = componente.form.controls.lineas.at(0);
+    linea0.controls.producto_id.setValue('prod-1');
+    componente.alCambiarProducto(linea0);
+    http.expectOne(`${environment.apiUrl}/productos/prod-1/stock`).flush({
+      almacenes: [{ public_id: 'alm-1', nombre: 'Depósito', stock_actual: 5, stock_minimo: null, fecha_actualizacion: '' }],
+      tiendas: [],
+    });
+    linea0.controls.origen_id.setValue('alm-1');
+    linea0.controls.cantidad.setValue(8);
+
+    expect(componente.hayErroresStock()).toBe(true);
+    componente.crear();
+    http.expectNone(`${environment.apiUrl}/ventas`);
 
     http.verify();
   });

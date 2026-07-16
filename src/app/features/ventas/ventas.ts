@@ -80,6 +80,9 @@ type LineaVentaGroup = ReturnType<typeof crearLineaVenta>;
                   <div>
                     <label class="block text-sm font-medium text-gray-700">Cantidad</label>
                     <input formControlName="cantidad" type="number" min="1" class="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm" />
+                    @if (mensajeStock(linea); as mensaje) {
+                      <p class="mt-1 text-xs text-amber-600">{{ mensaje }}</p>
+                    }
                   </div>
                 </div>
 
@@ -108,7 +111,7 @@ type LineaVentaGroup = ReturnType<typeof crearLineaVenta>;
           <app-boton variante="secundario" type="button" (click)="agregarLinea()">Agregar línea</app-boton>
 
           <div class="flex gap-2">
-            <app-boton type="submit" [disabled]="form.invalid">Guardar</app-boton>
+            <app-boton type="submit" [disabled]="form.invalid || hayErroresStock()">Guardar</app-boton>
             <app-boton variante="secundario" type="button" (click)="cancelar()">Cancelar</app-boton>
           </div>
         </form>
@@ -233,8 +236,35 @@ export class Ventas implements OnInit {
       .map((u) => ({ public_id: u.public_id, nombre: `${u.nombre} (${u.stock_actual} disponibles)` }));
   }
 
+  // Mensaje en vivo (no bloqueante hasta submit, mismo criterio que mensajeRuc
+  // en registro.ts): el backend sigue siendo la autoridad real (CHECK
+  // stock_actual >= 0 -> 23514 -> 400) por si el stock cambió entre que se
+  // leyó y que se confirma la venta — esto es solo feedback anticipado.
+  protected mensajeStock(linea: LineaVentaGroup): string | null {
+    const stock = this.stockPorLinea.get(linea);
+    const origenId = linea.controls.origen_id.value;
+    if (!stock || !origenId) return null;
+    const tipo = linea.controls.origen_tipo.value;
+    const lista = tipo === 'almacen' ? stock.almacenes : stock.tiendas;
+    const ubicacion = lista.find((u) => u.public_id === origenId);
+    if (!ubicacion) return null;
+    const cantidad = linea.controls.cantidad.value;
+    if (cantidad > ubicacion.stock_actual) {
+      return `Superaste el stock disponible en ese origen (${ubicacion.stock_actual}).`;
+    }
+    return null;
+  }
+
+  // Bloquea Guardar (y crear() como segunda barrera, por si el submit
+  // implícito de Enter esquiva el [disabled] del botón) — mismo mensaje que
+  // ya se muestra por línea, no hace falta que el backend lo rechace para
+  // que el usuario se entere.
+  protected hayErroresStock(): boolean {
+    return this.form.controls.lineas.controls.some((linea) => this.mensajeStock(linea) !== null);
+  }
+
   protected crear(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.hayErroresStock()) return;
 
     const v = this.form.getRawValue();
     const payload: VentaPayload = {
