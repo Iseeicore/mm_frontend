@@ -4,6 +4,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { NotificacionService } from '../../core/ui/notificacion.service';
 import { Tabla, ColumnaTabla } from '../../shared/tabla/tabla';
 import { Boton } from '../../shared/boton/boton';
+import { crearListadoPaginado } from '../../shared/paginacion/listado-paginado';
 import { Movimiento, MovimientoPayload, MovimientoService, TipoUbicacion } from './movimiento.service';
 import { Producto, ProductoService, StockUbicacion } from '../productos/producto.service';
 import { Almacen, AlmacenService } from '../almacenes/almacen.service';
@@ -133,11 +134,16 @@ export class Movimientos implements OnInit {
   private fb = inject(FormBuilder);
 
   protected columnas = COLUMNAS;
-  protected filas = signal<Movimiento[]>([]);
-  protected cargando = signal(false);
   protected mostrarForm = signal(false);
-  protected pagina = signal(1);
-  protected totalPaginas = signal(1);
+
+  private listado = crearListadoPaginado<Movimiento>((pagina) => this.movimientoService.listar(pagina, 20));
+  protected filas = this.listado.filas;
+  protected cargando = this.listado.cargando;
+  protected pagina = this.listado.pagina;
+  protected totalPaginas = this.listado.totalPaginas;
+  protected cargar = this.listado.cargar;
+  protected paginaSiguiente = this.listado.paginaSiguiente;
+  protected paginaAnterior = this.listado.paginaAnterior;
 
   protected productos = signal<Producto[]>([]);
   protected almacenes = signal<Almacen[]>([]);
@@ -164,39 +170,6 @@ export class Movimientos implements OnInit {
     this.productoService.listar(1, 100).subscribe(({ data }) => this.productos.set(data));
     this.almacenService.listar(1, 100).subscribe(({ data }) => this.almacenes.set(data));
     this.tiendaService.listar(1, 100).subscribe(({ data }) => this.tiendas.set(data));
-  }
-
-  protected cargar(): void {
-    this.cargando.set(true);
-    this.movimientoService.listar(this.pagina(), 20).subscribe({
-      next: ({ data, meta }) => {
-        const paginas = Math.max(meta.pages, 1);
-        // Se borró la última fila de una página > 1: recargar en la última
-        // página válida en vez de mostrar una tabla vacía (mismo criterio que CrudListBase).
-        if (this.pagina() > paginas) {
-          this.pagina.set(paginas);
-          this.cargando.set(false);
-          this.cargar();
-          return;
-        }
-        this.filas.set(data);
-        this.totalPaginas.set(paginas);
-        this.cargando.set(false);
-      },
-      error: () => this.cargando.set(false),
-    });
-  }
-
-  protected paginaSiguiente(): void {
-    if (this.pagina() >= this.totalPaginas()) return;
-    this.pagina.update((p) => p + 1);
-    this.cargar();
-  }
-
-  protected paginaAnterior(): void {
-    if (this.pagina() <= 1) return;
-    this.pagina.update((p) => p - 1);
-    this.cargar();
   }
 
   protected abrirCrear(): void {

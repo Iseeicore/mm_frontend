@@ -1,6 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 import { Tabla, ColumnaTabla } from '../../shared/tabla/tabla';
+import { crearListadoPaginado } from '../../shared/paginacion/listado-paginado';
 import { AlmacenService } from '../almacenes/almacen.service';
 import { TiendaService } from '../tiendas/tienda.service';
 import { TipoUbicacion } from '../movimientos/movimiento.service';
@@ -76,10 +78,19 @@ export class ProductosUbicacion implements OnInit {
 
   protected columnas = COLUMNAS;
   protected nombreUbicacion = signal('');
-  protected filas = signal<ProductoUbicacionFila[]>([]);
-  protected cargando = signal(false);
-  protected pagina = signal(1);
-  protected totalPaginas = signal(1);
+
+  private listado = crearListadoPaginado<ProductoUbicacionFila>((pagina) =>
+    this.servicio()
+      .productos(this.id, pagina)
+      .pipe(map(({ data, meta }) => ({ data: aFilas(data), meta }))),
+  );
+  protected filas = this.listado.filas;
+  protected cargando = this.listado.cargando;
+  protected pagina = this.listado.pagina;
+  protected totalPaginas = this.listado.totalPaginas;
+  protected cargar = this.listado.cargar;
+  protected paginaSiguiente = this.listado.paginaSiguiente;
+  protected paginaAnterior = this.listado.paginaAnterior;
 
   private tipo!: TipoUbicacion;
   private id!: string;
@@ -106,48 +117,6 @@ export class ProductosUbicacion implements OnInit {
 
   private servicio(): AlmacenService | TiendaService {
     return this.tipo === 'almacen' ? this.almacenService : this.tiendaService;
-  }
-
-  // Mismo guard que CrudListBase.cargar(): si la página actual quedó fuera de
-  // rango (ej. se vendió/traspasó suficiente stock como para que desaparezca
-  // la última página), recargar en la última página válida en vez de mostrar
-  // una tabla vacía con un número de página inválido.
-  protected cargar(): void {
-    this.cargando.set(true);
-    this.servicio()
-      .productos(this.id, this.pagina())
-      .subscribe({
-        next: ({ data, meta }) => {
-          const paginas = Math.max(meta.pages, 1);
-          if (this.pagina() > paginas) {
-            this.pagina.set(paginas);
-            this.cargando.set(false);
-            this.cargar();
-            return;
-          }
-          this.filas.set(aFilas(data));
-          this.totalPaginas.set(paginas);
-          this.cargando.set(false);
-        },
-        error: () => this.cargando.set(false),
-      });
-  }
-
-  // ponytail: paginaSiguiente/paginaAnterior/el guard de página fuera de rango
-  // de cargar() son la tercera copia literal de la misma lógica (CrudListBase
-  // y movimientos.ts ya la tienen cada uno por su lado). No se extrajo a un
-  // helper compartido acá para no tocar 3 archivos en esta iteración — subir
-  // a `deuda-tecnica` si aparece una cuarta copia.
-  protected paginaSiguiente(): void {
-    if (this.pagina() >= this.totalPaginas()) return;
-    this.pagina.update((p) => p + 1);
-    this.cargar();
-  }
-
-  protected paginaAnterior(): void {
-    if (this.pagina() <= 1) return;
-    this.pagina.update((p) => p - 1);
-    this.cargar();
   }
 
   protected idDe(fila: ProductoUbicacionFila): string {

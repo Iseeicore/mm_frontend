@@ -17,6 +17,8 @@ import { Productos } from './features/productos/productos';
 import { ProductoStock } from './features/productos/producto-stock';
 import { ProductosUbicacion } from './features/productos/productos-ubicacion';
 import { Movimientos } from './features/movimientos/movimientos';
+import { Ventas } from './features/ventas/ventas';
+import { VentaDetalle } from './features/ventas/venta-detalle';
 
 export const routes: Routes = [
   {
@@ -37,6 +39,8 @@ export const routes: Routes = [
       { path: 'productos', component: Productos },
       { path: 'productos/:id/stock', component: ProductoStock },
       { path: 'movimientos', component: Movimientos },
+      { path: 'ventas', component: Ventas },
+      { path: 'ventas/:id', component: VentaDetalle },
     ],
   },
   { path: 'login', component: Login },
