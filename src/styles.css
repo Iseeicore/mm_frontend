@@ -6,4 +6,49 @@
   --color-acento: #FF4081;
   --color-texto: #1A1A1A;
   --color-fondo: #FFFFFF;
+  /* Base neutra fija del shell (sidebar/navbar) tipo "soft UI" — a propósito
+     NO la toca TemaService, se mantiene igual sin importar la marca del tenant. */
+  --color-superficie: #E0E5EC;
+}
+
+/* Neomorfismo (skill estilo-neomorfico): sombra dual derivada del color real
+   de la superficie, no de blanco/negro puro. */
+:root {
+  --neo-offset-sm: 4px;
+  --neo-blur-sm: 6px;
+  --neo-offset-lg: 8px;
+  --neo-blur-lg: 14px;
+}
+
+.neo-sm { --neo-offset: var(--neo-offset-sm); --neo-blur: var(--neo-blur-sm); }
+.neo-lg { --neo-offset: var(--neo-offset-lg); --neo-blur: var(--neo-blur-lg); }
+
+.neo-panel {
+  --surface: var(--color-superficie);
+  --neo-light: color-mix(in srgb, var(--surface) 82%, white 18%);
+  --neo-dark: color-mix(in srgb, var(--surface) 75%, black 25%);
+}
+
+.neo-primario {
+  --surface: var(--color-primario);
+  --neo-light: color-mix(in srgb, var(--surface) 82%, white 18%);
+  --neo-dark: color-mix(in srgb, var(--surface) 75%, black 25%);
+}
+
+@utility shadow-neo {
+  box-shadow:
+    calc(-1 * var(--neo-offset)) calc(-1 * var(--neo-offset)) var(--neo-blur) var(--neo-light),
+    var(--neo-offset) var(--neo-offset) var(--neo-blur) var(--neo-dark);
+}
+
+@utility shadow-neo-hover {
+  box-shadow:
+    calc(-1.3 * var(--neo-offset)) calc(-1.3 * var(--neo-offset)) calc(1.3 * var(--neo-blur)) var(--neo-light),
+    calc(1.3 * var(--neo-offset)) calc(1.3 * var(--neo-offset)) calc(1.3 * var(--neo-blur)) var(--neo-dark);
+}
+
+@utility shadow-neo-inset {
+  box-shadow:
+    inset var(--neo-offset) var(--neo-offset) var(--neo-blur) var(--neo-dark),
+    inset calc(-1 * var(--neo-offset)) calc(-1 * var(--neo-offset)) var(--neo-blur) var(--neo-light);
 }
