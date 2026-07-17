@@ -6,6 +6,7 @@ import { Tabla, ColumnaTabla } from '../../shared/tabla/tabla';
 import { Boton } from '../../shared/boton/boton';
 import { Sistema, SistemaService } from '../sistemas/sistema.service';
 import { Configuracion, ConfiguracionPayload, ConfiguracionService } from './configuracion.service';
+import { TemaService } from '../../core/tema/tema.service';
 
 const COLUMNAS: ColumnaTabla<Configuracion>[] = [
   { clave: 'tema', titulo: 'Tema' },
@@ -96,6 +97,7 @@ export class Configuraciones extends CrudListBase<Configuracion, ConfiguracionPa
   protected servicio = inject(ConfiguracionService);
   protected auth = inject(AuthService);
   private sistemaService = inject(SistemaService);
+  private temaService = inject(TemaService);
   private fb = inject(FormBuilder);
 
   protected columnas = COLUMNAS;
@@ -154,5 +156,12 @@ export class Configuraciones extends CrudListBase<Configuracion, ConfiguracionPa
 
   protected idDe(config: Configuracion): number {
     return config.id;
+  }
+
+  // Re-pide la config activa tras cualquier guardado: si lo que se guardó
+  // no era la activa, esto es un no-op visual (misma config de siempre); si
+  // sí lo era, el tema se refleja al instante en esta misma sesión.
+  protected override afterGuardar(): void {
+    this.temaService.cargar().subscribe();
   }
 }

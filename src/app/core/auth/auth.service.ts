@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { TemaService } from '../tema/tema.service';
 
 const EMPRESA_KEY = 'mm_empresa_id';
 
@@ -27,6 +28,7 @@ interface MeResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
+  private tema = inject(TemaService);
 
   // Se cargan con GET /auth/me (usa get_matriz_permisos() de la base de datos:
   // las reglas de qué se muestra las define el backend, no el frontend).
@@ -78,6 +80,7 @@ export class AuthService {
       .pipe(tap(({ nombre, permisos }) => {
         this.nombre.set(nombre);
         this.permisos.set(permisos);
+        this.tema.cargar().subscribe();
       }));
   }
 

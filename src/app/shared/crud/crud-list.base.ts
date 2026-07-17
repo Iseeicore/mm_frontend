@@ -89,10 +89,16 @@ export abstract class CrudListBase<T, C = Partial<T>> {
         this.notificacion.toast(editando ? 'Actualizado' : 'Creado');
         this.mostrarForm.set(false);
         this.cargar();
+        this.afterGuardar();
       },
       error: (err) => this.notificacion.error(err.error?.error ?? 'Error al guardar'),
     });
   }
+
+  // No-op por default: hook opcional para que una subclase reaccione a un
+  // guardado exitoso sin que la clase base sepa nada de recursos concretos
+  // (ver Configuraciones, que lo usa para re-sincronizar el tema activo).
+  protected afterGuardar(): void {}
 
   protected async eliminar(item: T): Promise<void> {
     const confirmado = await this.notificacion.confirmar(`Se eliminará ${this.etiqueta(item)}.`);
