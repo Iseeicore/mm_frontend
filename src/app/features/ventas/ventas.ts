@@ -12,10 +12,11 @@ import { Almacen, AlmacenService } from '../almacenes/almacen.service';
 import { Tienda, TiendaService } from '../tiendas/tienda.service';
 
 const COLUMNAS: ColumnaTabla<Venta>[] = [
+  { clave: 'public_id', titulo: 'Número de venta', tipo: 'codigo', prefijo: 'V' },
   { clave: 'tienda_nombre', titulo: 'Tienda' },
-  { clave: 'total', titulo: 'Total' },
+  { clave: 'total', titulo: 'Total', tipo: 'moneda' },
   { clave: 'fecha_creacion', titulo: 'Fecha' },
-  { clave: 'creado_por_nombre', titulo: 'Creado por' },
+  { clave: 'creado_por_nombre', titulo: 'Creado por', tipo: 'avatar' },
 ];
 
 type StockProducto = { almacenes: StockUbicacion[]; tiendas: StockUbicacion[] };
@@ -39,12 +40,17 @@ type LineaVentaGroup = ReturnType<typeof crearLineaVenta>;
       <div class="mb-4 flex items-center justify-between">
         <h1 class="text-xl font-semibold text-gray-900">Ventas</h1>
         @if (auth.tienePermiso('ventas.create')) {
-          <app-boton (click)="abrirCrear()">Nueva venta</app-boton>
+          <app-boton [elevado]="true" (click)="abrirCrear()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Nueva venta
+          </app-boton>
         }
       </div>
 
       @if (mostrarForm()) {
-        <form [formGroup]="form" (ngSubmit)="crear()" class="mb-6 space-y-3 rounded-lg border border-gray-200 bg-white p-4">
+        <form [formGroup]="form" (ngSubmit)="crear()" class="neo-lg neo-panel bg-superficie shadow-neo mb-6 space-y-3 rounded-xl p-4">
           <h2 class="text-sm font-semibold text-gray-700">Nueva venta</h2>
 
           <div>
@@ -59,10 +65,10 @@ type LineaVentaGroup = ReturnType<typeof crearLineaVenta>;
 
           <div class="space-y-3">
             @for (linea of form.controls.lineas.controls; track $index; let i = $index) {
-              <div [formGroup]="linea" class="space-y-3 rounded border border-gray-200 p-3">
+              <div [formGroup]="linea" class="neo-sm neo-panel bg-superficie shadow-neo space-y-3 rounded-lg p-3">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-semibold text-gray-500">Línea {{ i + 1 }}</span>
-                  <app-boton variante="peligro" type="button" [disabled]="form.controls.lineas.length <= 1" (click)="quitarLinea(i)">
+                  <app-boton variante="peligro" [elevado]="true" type="button" [disabled]="form.controls.lineas.length <= 1" (click)="quitarLinea(i)">
                     Quitar
                   </app-boton>
                 </div>
@@ -108,11 +114,11 @@ type LineaVentaGroup = ReturnType<typeof crearLineaVenta>;
             }
           </div>
 
-          <app-boton variante="secundario" type="button" (click)="agregarLinea()">Agregar línea</app-boton>
+          <app-boton variante="secundario" [elevado]="true" type="button" (click)="agregarLinea()">Agregar línea</app-boton>
 
           <div class="flex gap-2">
-            <app-boton type="submit" [disabled]="form.invalid || hayErroresStock()">Guardar</app-boton>
-            <app-boton variante="secundario" type="button" (click)="cancelar()">Cancelar</app-boton>
+            <app-boton [elevado]="true" type="submit" [disabled]="form.invalid || hayErroresStock()">Guardar</app-boton>
+            <app-boton variante="secundario" [elevado]="true" type="button" (click)="cancelar()">Cancelar</app-boton>
           </div>
         </form>
       }
@@ -120,7 +126,7 @@ type LineaVentaGroup = ReturnType<typeof crearLineaVenta>;
       @if (cargando()) {
         <p class="text-sm text-gray-400">Cargando...</p>
       } @else {
-        <app-tabla [columnas]="columnas" [filas]="filas()" [clave]="idDe"
+        <app-tabla [columnas]="columnas" [filas]="filas()" [clave]="idDe" variante="elevado"
                    [puedeEditar]="false" [puedeEliminar]="false" [puedeVerDetalle]="true" etiquetaVerDetalle="Ver detalle"
                    [paginaActual]="pagina()" [totalPaginas]="totalPaginas()"
                    (anterior)="paginaAnterior()" (siguiente)="paginaSiguiente()" (verDetalle)="irADetalle($event)" />

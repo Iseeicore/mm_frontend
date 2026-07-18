@@ -13,78 +13,108 @@ type Paso = 'form' | 'seleccionar' | 'reintentar';
   selector: 'app-login',
   imports: [ReactiveFormsModule, RouterLink, OjoToggle, Boton],
   template: `
-    <div class="flex min-h-screen items-center justify-center bg-gray-50">
-      <div class="w-full max-w-sm space-y-4 rounded-lg bg-white p-8 shadow">
-        <h1 class="text-xl font-semibold text-gray-900">Iniciar sesión</h1>
+    <div class="flex min-h-screen w-full bg-fondo">
+      <div class="relative hidden flex-col justify-end overflow-hidden p-10 text-white md:flex md:w-1/2 lg:p-14"
+           style="background: linear-gradient(135deg, var(--color-primario) 0%, var(--color-acento) 100%)">
+        <div class="absolute -top-24 -right-24 h-[22rem] w-[22rem] rounded-full bg-white/15"></div>
+        <div class="absolute bottom-32 -left-12 h-40 w-40 rounded-full bg-white/10"></div>
+        <div class="absolute right-[28%] -bottom-8 h-32 w-32 rotate-12 rounded-2xl bg-white/15"></div>
 
-        @if (paso() === 'form') {
-          <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
-            @if (sinCuenta()) {
-              <p class="rounded bg-amber-50 p-3 text-sm text-amber-800">
-                No encontramos una cuenta con ese email. <a routerLink="/registro" class="underline">Registrá tu empresa</a>.
-              </p>
-            }
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Email</label>
-              <input formControlName="email" type="email" autocomplete="username"
-                     class="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Contraseña</label>
-              <div class="relative mt-1">
-                <input formControlName="password" [type]="tipoInput('password')" autocomplete="current-password"
-                       class="w-full rounded border border-gray-300 px-3 py-2 pr-10 text-sm focus:border-blue-500 focus:outline-none" />
-                <app-ojo-toggle [visible]="esVisible('password')" (alternar)="alternarVisibilidad('password')" />
-              </div>
-            </div>
-
-            <app-boton type="submit" [disabled]="form.invalid || loading()" class="block w-full">
-              {{ loading() ? 'Ingresando...' : 'Ingresar' }}
-            </app-boton>
-
-            @if (recordarEmpresa()) {
-              <button type="button" (click)="olvidarEmpresa()" class="block w-full text-center text-xs text-gray-400 underline">
-                ¿No es tu empresa? Cambiar
-              </button>
-            }
-
-            <p class="text-center text-sm text-gray-500">
-              ¿No tenés cuenta? <a routerLink="/registro" class="text-blue-600 underline">Registrá tu empresa</a>
-            </p>
-          </form>
-        }
-
-        @if (paso() === 'seleccionar') {
-          <div class="space-y-2">
-            <p class="text-sm text-gray-600">Tu email está en más de una empresa. Elegí con cuál ingresar:</p>
-            @for (empresa of empresasDisponibles(); track empresa.public_id) {
-              <button type="button" (click)="seleccionarEmpresa(empresa)"
-                      class="block w-full rounded border border-gray-300 px-3 py-2 text-left text-sm hover:bg-gray-50">
-                {{ empresa.nombre }}
-              </button>
-            }
-            <button type="button" (click)="volver()" class="text-sm text-gray-500 underline">Volver</button>
+        <div class="relative z-10 max-w-md">
+          <div class="mb-6 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wider uppercase">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+            </svg>
+            Bienvenido
           </div>
-        }
+          <h2 class="mb-3 text-4xl font-bold leading-tight">Tu negocio te espera.</h2>
+          <p class="text-white/90">Iniciá sesión y continuá donde lo dejaste.</p>
+        </div>
+      </div>
 
-        @if (paso() === 'reintentar') {
-          <form [formGroup]="formReintento" (ngSubmit)="reintentar()" class="space-y-4">
-            <p class="text-sm text-gray-600">
-              Tu contraseña en <strong>{{ empresaSeleccionada()?.nombre }}</strong> es distinta. Ingresála:
-            </p>
-            <div class="relative">
-              <input formControlName="password" [type]="tipoInput('reintento')" autocomplete="current-password"
-                     class="w-full rounded border border-gray-300 px-3 py-2 pr-10 text-sm focus:border-blue-500 focus:outline-none" />
-              <app-ojo-toggle [visible]="esVisible('reintento')" (alternar)="alternarVisibilidad('reintento')" />
+      <div class="flex flex-1 items-center justify-center px-6 py-12 lg:px-12">
+        <div class="w-full max-w-sm">
+          @if (paso() === 'form') {
+            <form [formGroup]="form" (ngSubmit)="submit()" class="relative">
+              <div class="bg-primario absolute -top-2 -left-2 h-12 w-12 rounded-xl"></div>
+              <h1 class="relative mb-1 text-4xl font-bold tracking-tight text-texto">Ingresar.</h1>
+              <p class="mb-8 text-sm text-secundario">
+                ¿No tenés cuenta?
+                <a routerLink="/registro" class="text-primario font-semibold hover:underline">Registrá tu empresa</a>
+              </p>
+
+              @if (sinCuenta()) {
+                <p class="mb-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+                  No encontramos una cuenta con ese email. <a routerLink="/registro" class="underline">Registrá tu empresa</a>.
+                </p>
+              }
+
+              <div class="flex flex-col gap-4">
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-secundario uppercase">Email</label>
+                  <input formControlName="email" type="email" autocomplete="username"
+                         spellcheck="false" autocorrect="off" autocapitalize="off"
+                         class="neo-sm neo-panel bg-superficie shadow-neo-inset focus:ring-primario/40 w-full rounded-xl px-4 py-3 text-sm text-texto outline-none focus:ring-2" />
+                </div>
+
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold tracking-wider text-secundario uppercase">Contraseña</label>
+                  <div class="neo-sm neo-panel bg-superficie shadow-neo-inset focus-within:ring-primario/40 relative rounded-xl focus-within:ring-2">
+                    <input formControlName="password" [type]="tipoInput('password')" autocomplete="current-password"
+                           spellcheck="false" autocorrect="off" autocapitalize="off"
+                           class="w-full bg-transparent px-4 py-3 pr-10 text-sm text-texto outline-none" />
+                    <app-ojo-toggle [visible]="esVisible('password')" (alternar)="alternarVisibilidad('password')" />
+                  </div>
+                </div>
+
+                <app-boton type="submit" [disabled]="form.invalid || loading()"
+                           class="mt-2 block [&>button]:w-full [&>button]:rounded-xl [&>button]:py-3.5 [&>button]:text-sm [&>button]:font-bold [&>button]:tracking-wider [&>button]:uppercase">
+                  {{ loading() ? 'Ingresando...' : 'Ingresar' }}
+                </app-boton>
+
+                @if (recordarEmpresa()) {
+                  <button type="button" (click)="olvidarEmpresa()" class="block w-full text-center text-xs text-secundario underline">
+                    ¿No es tu empresa? Cambiar
+                  </button>
+                }
+              </div>
+            </form>
+          }
+
+          @if (paso() === 'seleccionar') {
+            <div class="space-y-2">
+              <h1 class="mb-1 text-2xl font-bold text-texto">Elegí tu empresa.</h1>
+              <p class="mb-4 text-sm text-secundario">Tu email está en más de una empresa. Elegí con cuál ingresar:</p>
+              @for (empresa of empresasDisponibles(); track empresa.public_id) {
+                <button type="button" (click)="seleccionarEmpresa(empresa)"
+                        class="neo-sm neo-panel bg-superficie shadow-neo hover:shadow-neo-hover block w-full rounded-xl px-4 py-3 text-left text-sm text-texto transition-shadow">
+                  {{ empresa.nombre }}
+                </button>
+              }
+              <button type="button" (click)="volver()" class="text-sm text-secundario underline">Volver</button>
             </div>
-            <app-boton type="submit" [disabled]="formReintento.invalid || loading()" class="block w-full">
-              {{ loading() ? 'Ingresando...' : 'Ingresar' }}
-            </app-boton>
-            <button type="button" (click)="volver()" class="block w-full text-center text-sm text-gray-500 underline">Volver</button>
-          </form>
-        }
+          }
+
+          @if (paso() === 'reintentar') {
+            <form [formGroup]="formReintento" (ngSubmit)="reintentar()">
+              <h1 class="mb-1 text-2xl font-bold text-texto">Confirmá tu contraseña.</h1>
+              <p class="mb-4 text-sm text-secundario">
+                Tu contraseña en <strong>{{ empresaSeleccionada()?.nombre }}</strong> es distinta. Ingresála:
+              </p>
+              <div class="neo-sm neo-panel bg-superficie shadow-neo-inset focus-within:ring-primario/40 relative mb-4 rounded-xl focus-within:ring-2">
+                <input formControlName="password" [type]="tipoInput('reintento')" autocomplete="current-password"
+                       spellcheck="false" autocorrect="off" autocapitalize="off"
+                       class="w-full bg-transparent px-4 py-3 pr-10 text-sm text-texto outline-none" />
+                <app-ojo-toggle [visible]="esVisible('reintento')" (alternar)="alternarVisibilidad('reintento')" />
+              </div>
+              <app-boton type="submit" [disabled]="formReintento.invalid || loading()"
+                         class="mb-3 block [&>button]:w-full [&>button]:rounded-xl [&>button]:py-3.5 [&>button]:text-sm [&>button]:font-bold [&>button]:tracking-wider [&>button]:uppercase">
+                {{ loading() ? 'Ingresando...' : 'Ingresar' }}
+              </app-boton>
+              <button type="button" (click)="volver()" class="block w-full text-center text-sm text-secundario underline">Volver</button>
+            </form>
+          }
+        </div>
       </div>
     </div>
   `,

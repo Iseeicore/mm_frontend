@@ -35,6 +35,21 @@
   --neo-dark: color-mix(in srgb, var(--surface) 75%, black 25%);
 }
 
+.neo-secundario {
+  --surface: var(--color-secundario);
+  --neo-light: color-mix(in srgb, var(--surface) 82%, white 18%);
+  --neo-dark: color-mix(in srgb, var(--surface) 75%, black 25%);
+}
+
+/* Peligro NO se deriva de la marca del tenant a propósito: "eliminar" tiene
+   que leerse como rojo universal sin importar el color_primario/acento que
+   configuró esa empresa. */
+.neo-peligro {
+  --surface: #dc2626;
+  --neo-light: color-mix(in srgb, var(--surface) 82%, white 18%);
+  --neo-dark: color-mix(in srgb, var(--surface) 75%, black 25%);
+}
+
 @utility shadow-neo {
   box-shadow:
     calc(-1 * var(--neo-offset)) calc(-1 * var(--neo-offset)) var(--neo-blur) var(--neo-light),
@@ -51,4 +66,10 @@
   box-shadow:
     inset var(--neo-offset) var(--neo-offset) var(--neo-blur) var(--neo-dark),
     inset calc(-1 * var(--neo-offset)) calc(-1 * var(--neo-offset)) var(--neo-blur) var(--neo-light);
+}
+
+@utility shadow-neo-disabled {
+  box-shadow:
+    calc(-1 * var(--neo-offset)) calc(-1 * var(--neo-offset)) var(--neo-blur) color-mix(in srgb, var(--neo-light) 40%, transparent),
+    var(--neo-offset) var(--neo-offset) var(--neo-blur) color-mix(in srgb, var(--neo-dark) 40%, transparent);
 }

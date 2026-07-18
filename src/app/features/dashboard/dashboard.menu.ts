@@ -7,9 +7,13 @@ export interface ItemMenu {
   permiso?: string;
 }
 
+export type TintMenu = 'violeta' | 'ambar';
+
 export interface GrupoMenu {
   label: string;
   hijos: ItemMenu[];
+  // Color de hover diferencial por sección (ver dashboard.ts, TINT_HOVER).
+  color: TintMenu;
 }
 
 // Qué entra al sidebar lo decide el backend (get_matriz_permisos), esta lista
@@ -18,6 +22,7 @@ export interface GrupoMenu {
 export const MENU_GRUPOS: GrupoMenu[] = [
   {
     label: 'Administración',
+    color: 'violeta',
     hijos: [
       { label: 'Usuarios', ruta: '/usuarios', permiso: 'usuarios.read' },
       { label: 'Roles', ruta: '/roles', permiso: 'roles.read' },
@@ -28,6 +33,7 @@ export const MENU_GRUPOS: GrupoMenu[] = [
   },
   {
     label: 'Inventario',
+    color: 'ambar',
     hijos: [
       { label: 'Productos', ruta: '/productos', permiso: 'productos.read' },
       { label: 'Almacenes', ruta: '/almacenes', permiso: 'almacenes.read' },
