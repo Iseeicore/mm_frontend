@@ -1,5 +1,6 @@
 import { Component, computed, input, output } from '@angular/core';
 import { Boton } from '../boton/boton';
+import { formatoMoneda } from '../moneda';
 
 export interface ColumnaTabla<T> {
   clave: keyof T & string;
@@ -17,12 +18,15 @@ export interface ColumnaTabla<T> {
   prefijo?: string;
 }
 
-function iniciales(valor: unknown): string {
+// Exportadas: venta-detalle.ts las reusa para su cabecera/tabla local (no
+// pasa por <app-tabla> porque necesita scroll + buscador propios, ver skill
+// estilo-bold-accent — no ameritaba duplicar esta lógica de 2 líneas).
+export function iniciales(valor: unknown): string {
   const partes = String(valor ?? '').trim().split(/\s+/);
   return ((partes[0]?.[0] ?? '') + (partes[1]?.[0] ?? '')).toUpperCase();
 }
 
-function codigoCorto(valor: unknown): string {
+export function codigoCorto(valor: unknown): string {
   const texto = String(valor ?? '');
   return texto.length > 8 ? `${texto.slice(0, 8)}…` : texto;
 }
@@ -105,7 +109,7 @@ function codigoCorto(valor: unknown): string {
 
       <div [class]="pieClases()">
         <app-boton variante="secundario" [elevado]="elevado()" [disabled]="paginaActual() <= 1" (click)="anterior.emit()">Anterior</app-boton>
-        <span [class]="elevado() ? 'neo-sm neo-panel bg-superficie shadow-neo-inset rounded-full px-4 py-1.5 text-primario font-semibold' : ''">Página {{ paginaActual() }} de {{ totalPaginas() }}</span>
+        <span [class]="elevado() ? 'bg-primario/10 rounded-full px-4 py-1.5 text-primario font-semibold' : ''">Página {{ paginaActual() }} de {{ totalPaginas() }}</span>
         <app-boton variante="secundario" [elevado]="elevado()" [disabled]="paginaActual() >= totalPaginas()" (click)="siguiente.emit()">Siguiente</app-boton>
       </div>
     </div>
@@ -131,9 +135,13 @@ export class Tabla<T> {
   anterior = output<void>();
   siguiente = output<void>();
 
+  // Bold Accent (ver estilo-bold-accent/agents.md): cards blancas con borde
+  // sutil + sombra suave de un solo tono — NO neomorfismo (sin sombra dual,
+  // sin shadow-neo-inset). El neomorfismo queda reservado a casos puntuales
+  // ya confirmados (inputs de login/registro/cambiar-password).
   protected elevado = computed(() => this.variante() === 'elevado');
   protected contenedorClases = computed(() =>
-    this.elevado() ? 'neo-lg neo-panel bg-superficie shadow-neo overflow-hidden rounded-xl' : '',
+    this.elevado() ? 'bg-fondo border border-black/5 shadow-sm overflow-hidden rounded-lg' : '',
   );
   // Header con tinte del color secundario de la marca (antes era un negro al
   // 2%, casi invisible — pedido explícito: "ponle el color secundario").
@@ -154,27 +162,23 @@ export class Tabla<T> {
       : 'flex items-center justify-between border-t border-gray-200 px-3 py-2 text-sm text-gray-500',
   );
   protected chipMonedaClases = computed(() =>
-    this.elevado()
-      ? 'neo-sm neo-panel bg-superficie shadow-neo-inset inline-block rounded-lg px-3 py-1 font-mono font-bold text-primario'
-      : 'font-mono',
+    this.elevado() ? 'bg-primario/10 inline-block rounded-lg px-3 py-1 font-mono font-bold text-primario' : 'font-mono',
   );
   protected avatarClases = computed(() =>
     this.elevado()
-      ? 'neo-sm neo-panel bg-superficie shadow-neo-inset flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-primario'
+      ? 'bg-primario/10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-primario'
       : 'flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-[11px] font-bold text-gray-600',
   );
   protected iconoCodigoClases = computed(() =>
     this.elevado()
-      ? 'neo-sm neo-panel bg-superficie shadow-neo-inset flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-primario'
+      ? 'bg-primario/10 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-primario'
       : 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500',
   );
 
   protected iniciales = iniciales;
   protected codigoCorto = codigoCorto;
+  protected formatoMoneda = formatoMoneda;
   protected texto(valor: unknown): string {
     return String(valor ?? '');
-  }
-  protected formatoMoneda(valor: unknown): string {
-    return Number(valor).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 }

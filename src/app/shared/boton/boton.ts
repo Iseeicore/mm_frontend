@@ -9,21 +9,22 @@ const CLASES_VARIANTE: Record<Variante, string> = {
   peligro: 'rounded bg-red-600 text-white hover:bg-red-700',
 };
 
-// Opt-in (skill estilo-neomorfico, ver agents.md): mismo mecanismo de sombra
-// dual ya usado en el shell del dashboard, pero acá como variante deliberada
-// por vista (elevado=true), no un default global — piloteado en ventas.ts.
-// Más ancho que el plano (px-6 vs px-3) y con bg-* explícito: neo-panel/
-// neo-primario solo definen las variables de la sombra, no el relleno —
-// sin el bg-*, el botón queda "lavado" (se ve el fondo de la página a
-// través, no un color sólido).
-const CLASES_BASE_ELEVADA = 'inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold disabled:opacity-50';
+// Opt-in (skill estilo-bold-accent, ver agents.md): default del proyecto para
+// tablas/cards/botones "elevado" — piloteado en ventas.ts, no un default
+// global todavía. El neomorfismo (shadow-neo/neo-panel) queda reservado para
+// casos puntuales ya confirmados (inputs de login/registro/cambiar-password),
+// NO es la base de este mecanismo.
+// Más ancho que el plano (px-6 vs px-3).
+const CLASES_BASE_ELEVADA = 'inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold disabled:opacity-50 transition-all active:scale-[0.98]';
 const CLASES_VARIANTE_ELEVADA: Record<Variante, string> = {
-  primario: 'neo-sm neo-primario bg-primario shadow-neo hover:shadow-neo-hover active:shadow-neo-inset disabled:shadow-neo-disabled transition-shadow rounded-full text-white',
+  // El "botón 3D" del Login Bold Accent / dashboard.jsx: relleno sólido +
+  // sombra plana (no difusa) del color de acento, se levanta en hover.
+  primario: 'bg-primario text-white uppercase tracking-wide rounded-full shadow-[0_4px_0_0_var(--color-acento)] hover:-translate-y-0.5 active:translate-y-0',
   // rounded-lg (no rounded-full): un pill completo en un botón chico de fila
   // de tabla ("Ver detalle") se lee "demasiado circular" — el pill entero
   // queda reservado para el CTA primario.
-  secundario: 'neo-sm neo-panel bg-superficie shadow-neo hover:shadow-neo-hover active:shadow-neo-inset disabled:shadow-neo-disabled transition-shadow rounded-lg text-primario',
-  peligro: 'neo-sm neo-peligro bg-red-600 shadow-neo hover:shadow-neo-hover active:shadow-neo-inset disabled:shadow-neo-disabled transition-shadow rounded-lg text-white',
+  secundario: 'bg-fondo text-primario rounded-lg border border-black/10 shadow-sm hover:bg-black/5',
+  peligro: 'bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700',
 };
 
 @Component({
