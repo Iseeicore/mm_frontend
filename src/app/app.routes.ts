@@ -19,6 +19,7 @@ import { ProductosUbicacion } from './features/productos/productos-ubicacion';
 import { Movimientos } from './features/movimientos/movimientos';
 import { Ventas } from './features/ventas/ventas';
 import { VentaDetalle } from './features/ventas/venta-detalle';
+import { ReportesTrazabilidad } from './features/reportes/reportes-trazabilidad';
 
 export const routes: Routes = [
   {
@@ -41,6 +42,7 @@ export const routes: Routes = [
       { path: 'movimientos', component: Movimientos },
       { path: 'ventas', component: Ventas },
       { path: 'ventas/:id', component: VentaDetalle },
+      { path: 'reportes/trazabilidad', component: ReportesTrazabilidad },
     ],
   },
   { path: 'login', component: Login },

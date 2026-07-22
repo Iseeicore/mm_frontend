@@ -7,7 +7,7 @@ export interface ItemMenu {
   permiso?: string;
 }
 
-export type TintMenu = 'violeta' | 'ambar';
+export type TintMenu = 'violeta' | 'ambar' | 'azul';
 
 export interface GrupoMenu {
   label: string;
@@ -39,6 +39,13 @@ export const MENU_GRUPOS: GrupoMenu[] = [
       { label: 'Almacenes', ruta: '/almacenes', permiso: 'almacenes.read' },
       { label: 'Tiendas', ruta: '/tiendas', permiso: 'tiendas.read' },
       { label: 'Movimientos', ruta: '/movimientos', permiso: 'movimientos.read' },
+    ],
+  },
+  {
+    label: 'Reportes',
+    color: 'azul',
+    hijos: [
+      { label: 'Trazabilidad de stock', ruta: '/reportes/trazabilidad', permiso: 'reportes.read' },
     ],
   },
 ];
