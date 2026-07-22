@@ -40,6 +40,7 @@ export function codigoCorto(valor: unknown): string {
   imports: [Boton],
   template: `
     <div [class]="contenedorClases()">
+      <div class="overflow-x-auto">
       <table class="w-full border-collapse text-left text-sm">
         <thead>
           <tr [class]="filaHeaderClases()">
@@ -106,6 +107,7 @@ export function codigoCorto(valor: unknown): string {
           }
         </tbody>
       </table>
+      </div>
 
       <div [class]="pieClases()">
         <app-boton variante="secundario" [elevado]="elevado()" [disabled]="paginaActual() <= 1" (click)="anterior.emit()">Anterior</app-boton>

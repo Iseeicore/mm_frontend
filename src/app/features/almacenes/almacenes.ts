@@ -20,7 +20,12 @@ const COLUMNAS: ColumnaTabla<Almacen>[] = [
       <div class="mb-4 flex items-center justify-between">
         <h1 class="text-xl font-semibold text-gray-900">Almacenes</h1>
         @if (auth.tienePermiso('almacenes.create')) {
-          <app-boton (click)="abrirCrear()">Nuevo almacén</app-boton>
+          <app-boton [elevado]="true" (click)="abrirCrear()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Nuevo almacén
+          </app-boton>
         }
       </div>
 
@@ -48,7 +53,7 @@ const COLUMNAS: ColumnaTabla<Almacen>[] = [
       @if (cargando()) {
         <p class="text-sm text-gray-400">Cargando...</p>
       } @else {
-        <app-tabla [columnas]="columnas" [filas]="filas()" [clave]="idDe"
+        <app-tabla [columnas]="columnas" [filas]="filas()" [clave]="idDe" variante="elevado"
                    [puedeEditar]="auth.tienePermiso('almacenes.update')"
                    [puedeEliminar]="auth.tienePermiso('almacenes.delete')"
                    [puedeVerDetalle]="auth.tienePermiso('almacenes.read')" etiquetaVerDetalle="Ver productos"

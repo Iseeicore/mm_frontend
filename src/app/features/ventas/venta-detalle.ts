@@ -115,7 +115,7 @@ function aFilas(lineas: VentaLineaDetalle[]): VentaLineaFila[] {
             </div>
           </div>
 
-          <div class="max-h-[400px] overflow-y-auto">
+          <div class="max-h-[400px] overflow-x-auto overflow-y-auto">
             <table class="w-full border-collapse text-left text-sm">
               <thead class="sticky top-0 z-10 bg-secundario/10">
                 <tr class="border-b border-black/5">

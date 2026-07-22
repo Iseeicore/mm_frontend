@@ -26,7 +26,7 @@ const COLUMNAS: ColumnaTabla<Permiso>[] = [
       @if (cargando()) {
         <p class="text-sm text-gray-400">Cargando...</p>
       } @else {
-        <app-tabla [columnas]="columnas" [filas]="filas()" [clave]="idDe"
+        <app-tabla [columnas]="columnas" [filas]="filas()" [clave]="idDe" variante="elevado"
                    [paginaActual]="pagina()" [totalPaginas]="totalPaginas()"
                    (anterior)="paginaAnterior()" (siguiente)="paginaSiguiente()" />
       }

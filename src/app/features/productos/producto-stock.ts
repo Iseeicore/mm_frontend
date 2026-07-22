@@ -44,7 +44,7 @@ function aFilas(lista: StockUbicacion[]): StockFila[] {
         <div class="space-y-6">
           <div>
             <h2 class="mb-2 text-sm font-semibold text-gray-700">Almacenes</h2>
-            <app-tabla [columnas]="columnas" [filas]="almacenes()" [clave]="idDe"
+            <app-tabla [columnas]="columnas" [filas]="almacenes()" [clave]="idDe" variante="elevado"
                        [puedeEditar]="false" [puedeEliminar]="false" [puedeVerDetalle]="false"
                        [paginaActual]="1" [totalPaginas]="1"
                        (anterior)="sinOp()" (siguiente)="sinOp()" />
@@ -52,7 +52,7 @@ function aFilas(lista: StockUbicacion[]): StockFila[] {
 
           <div>
             <h2 class="mb-2 text-sm font-semibold text-gray-700">Tiendas</h2>
-            <app-tabla [columnas]="columnas" [filas]="tiendas()" [clave]="idDe"
+            <app-tabla [columnas]="columnas" [filas]="tiendas()" [clave]="idDe" variante="elevado"
                        [puedeEditar]="false" [puedeEliminar]="false" [puedeVerDetalle]="false"
                        [paginaActual]="1" [totalPaginas]="1"
                        (anterior)="sinOp()" (siguiente)="sinOp()" />

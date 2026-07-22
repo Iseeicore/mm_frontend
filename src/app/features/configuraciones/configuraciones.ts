@@ -22,7 +22,12 @@ const COLUMNAS: ColumnaTabla<Configuracion>[] = [
       <div class="mb-4 flex items-center justify-between">
         <h1 class="text-xl font-semibold text-gray-900">Configuraciones</h1>
         @if (auth.tienePermiso('sistemas.create')) {
-          <app-boton (click)="abrirCrear()">Nueva configuración</app-boton>
+          <app-boton [elevado]="true" (click)="abrirCrear()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Nueva configuración
+          </app-boton>
         }
       </div>
 
@@ -83,7 +88,7 @@ const COLUMNAS: ColumnaTabla<Configuracion>[] = [
       @if (cargando()) {
         <p class="text-sm text-gray-400">Cargando...</p>
       } @else {
-        <app-tabla [columnas]="columnas" [filas]="filas()" [clave]="idDe"
+        <app-tabla [columnas]="columnas" [filas]="filas()" [clave]="idDe" variante="elevado"
                    [puedeEditar]="auth.tienePermiso('sistemas.update')"
                    [puedeEliminar]="auth.tienePermiso('sistemas.delete')"
                    [paginaActual]="pagina()" [totalPaginas]="totalPaginas()"

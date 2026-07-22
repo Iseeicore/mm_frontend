@@ -18,7 +18,11 @@ const TINT_HOVER: Record<string, string> = {
   template: `
     <div class="bg-superficie flex h-screen gap-4 p-4"
          style="background-image: radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--color-primario) 8%, transparent), transparent 55%), radial-gradient(circle at 85% 100%, color-mix(in srgb, var(--color-acento) 8%, transparent), transparent 55%)">
-      <aside class="bg-fondo flex w-64 shrink-0 flex-col rounded-2xl border border-black/5 p-4 shadow-sm">
+      @if (menuMovilAbierto()) {
+        <div class="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden" (click)="menuMovilAbierto.set(false)"></div>
+      }
+
+      <aside data-menu-movil [class]="asideClases()">
         <div class="mb-6 flex items-center gap-2.5 px-1">
           <div class="relative h-9 w-9 shrink-0">
             <div class="bg-texto absolute inset-0 rounded-[0.625rem]"></div>
@@ -34,6 +38,7 @@ const TINT_HOVER: Record<string, string> = {
 
         <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto">
           <a routerLink="/" routerLinkActive="bg-texto text-fondo font-semibold" [routerLinkActiveOptions]="{ exact: true }"
+             (click)="menuMovilAbierto.set(false)"
              class="text-secundario hover:bg-black/5 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5 shrink-0">
               <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -71,6 +76,7 @@ const TINT_HOVER: Record<string, string> = {
                 <div class="relative mt-0.5 mb-1 ml-2 flex flex-col gap-0.5 border-l border-black/10 pl-4">
                   @for (item of grupo.hijos; track item.ruta) {
                     <a [routerLink]="item.ruta" routerLinkActive="text-texto font-semibold"
+                       (click)="menuMovilAbierto.set(false)"
                        class="text-secundario hover:text-texto group flex items-center gap-2.5 rounded-lg py-2 pr-3 text-[0.83rem] font-medium transition-colors">
                       <span class="bg-primario h-1.5 w-1.5 shrink-0 rounded-full opacity-0 transition-opacity"
                             [class.opacity-100]="esRutaActiva(item.ruta)"></span>
@@ -83,6 +89,7 @@ const TINT_HOVER: Record<string, string> = {
           }
           @for (item of sueltoVisible(); track item.ruta) {
             <a [routerLink]="item.ruta" routerLinkActive="bg-texto text-fondo font-semibold"
+               (click)="menuMovilAbierto.set(false)"
                class="text-secundario hover:bg-black/5 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5 shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
@@ -95,6 +102,14 @@ const TINT_HOVER: Record<string, string> = {
 
       <div class="flex flex-1 flex-col gap-4 overflow-hidden">
         <header class="bg-fondo/70 flex items-center gap-3 rounded-full border border-black/5 py-2 pr-2 pl-5 shadow-sm backdrop-blur-xl">
+          <button type="button" data-menu-movil (click)="menuMovilAbierto.set(!menuMovilAbierto())"
+                  class="text-secundario flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-black/5 lg:hidden"
+                  aria-label="Abrir menú">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+
           <div class="flex flex-1 flex-col leading-tight">
             <span class="text-secundario text-[0.65rem] font-semibold tracking-widest uppercase">{{ breadcrumbActual() }}</span>
             <h1 class="text-texto text-[1.05rem] font-bold tracking-tight">{{ tituloActual() }}</h1>
@@ -162,6 +177,15 @@ export class Dashboard {
   private router = inject(Router);
 
   protected menuUsuario = signal(false);
+  // Drawer del sidebar en pantallas chicas (< lg): en lg+ queda estático e
+  // inline como siempre, esta señal no tiene efecto visual ahí.
+  protected menuMovilAbierto = signal(false);
+
+  protected asideClases = computed(() =>
+    'bg-fondo flex w-64 shrink-0 flex-col rounded-2xl border border-black/5 p-4 shadow-sm ' +
+    'fixed inset-y-0 left-0 z-50 transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 ' +
+    (this.menuMovilAbierto() ? 'translate-x-0' : '-translate-x-full'),
+  );
 
   protected gruposVisibles = computed(() =>
     MENU_GRUPOS
@@ -183,10 +207,10 @@ export class Dashboard {
   }
 
   @HostListener('document:click', ['$event'])
-  protected cerrarMenuUsuarioAlClickAfuera(evento: MouseEvent): void {
-    if (!this.menuUsuario()) return;
+  protected cerrarMenusAlClickAfuera(evento: MouseEvent): void {
     const objetivo = evento.target as HTMLElement;
-    if (!objetivo.closest('[data-menu-usuario]')) this.menuUsuario.set(false);
+    if (this.menuUsuario() && !objetivo.closest('[data-menu-usuario]')) this.menuUsuario.set(false);
+    if (this.menuMovilAbierto() && !objetivo.closest('[data-menu-movil]')) this.menuMovilAbierto.set(false);
   }
 
   protected toggleGrupo(label: string): void {

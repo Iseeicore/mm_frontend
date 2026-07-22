@@ -14,17 +14,18 @@ const CLASES_VARIANTE: Record<Variante, string> = {
 // global todavía. El neomorfismo (shadow-neo/neo-panel) queda reservado para
 // casos puntuales ya confirmados (inputs de login/registro/cambiar-password),
 // NO es la base de este mecanismo.
-// Más ancho que el plano (px-6 vs px-3).
-const CLASES_BASE_ELEVADA = 'inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold disabled:opacity-50 transition-all active:scale-[0.98]';
+// Más ancho que el plano (px-6 vs px-3). rounded-lg acá (no rounded-full):
+// el usuario pidió bajar el radius del CTA primario para que quede parejo
+// con secundario/peligro — un pill completo en un botón chico de fila de
+// tabla ("Ver detalle") ya se leía "demasiado circular", y el CTA primario
+// pasa a compartir el mismo criterio.
+const CLASES_BASE_ELEVADA = 'inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-bold disabled:opacity-50 transition-all active:scale-[0.98]';
 const CLASES_VARIANTE_ELEVADA: Record<Variante, string> = {
   // El "botón 3D" del Login Bold Accent / dashboard.jsx: relleno sólido +
   // sombra plana (no difusa) del color de acento, se levanta en hover.
-  primario: 'bg-primario text-white uppercase tracking-wide rounded-full shadow-[0_4px_0_0_var(--color-acento)] hover:-translate-y-0.5 active:translate-y-0',
-  // rounded-lg (no rounded-full): un pill completo en un botón chico de fila
-  // de tabla ("Ver detalle") se lee "demasiado circular" — el pill entero
-  // queda reservado para el CTA primario.
-  secundario: 'bg-fondo text-primario rounded-lg border border-black/10 shadow-sm hover:bg-black/5',
-  peligro: 'bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700',
+  primario: 'bg-primario text-white uppercase tracking-wide shadow-[0_4px_0_0_var(--color-acento)] hover:-translate-y-0.5 active:translate-y-0',
+  secundario: 'bg-fondo text-primario border border-black/10 shadow-sm hover:bg-black/5',
+  peligro: 'bg-red-600 text-white shadow-sm hover:bg-red-700',
 };
 
 @Component({
