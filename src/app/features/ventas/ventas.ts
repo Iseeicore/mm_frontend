@@ -35,7 +35,7 @@ interface ItemCarrito {
   template: `
     <div class="p-6">
       <div class="mb-4 flex items-center justify-between">
-        <h1 class="text-xl font-semibold text-gray-900">Ventas</h1>
+        <h1 class="text-texto text-xl font-semibold">Ventas</h1>
         @if (auth.tienePermiso('ventas.create')) {
           <app-boton [elevado]="true" (click)="abrirCrear()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">

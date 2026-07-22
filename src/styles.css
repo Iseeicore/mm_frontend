@@ -1,3 +1,9 @@
+@import "@fontsource/manrope/400.css";
+@import "@fontsource/manrope/500.css";
+@import "@fontsource/manrope/700.css";
+@import "@fontsource/manrope/800.css";
+@import "@fontsource/space-mono/400.css";
+@import "@fontsource/space-mono/700.css";
 @import "tailwindcss";
 
 @theme {
@@ -9,6 +15,12 @@
   /* Base neutra fija del shell (sidebar/navbar) tipo "soft UI" — a propósito
      NO la toca TemaService, se mantiene igual sin importar la marca del tenant. */
   --color-superficie: #E0E5EC;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
 }
 
 /* Neomorfismo (skill estilo-neomorfico): sombra dual derivada del color real
@@ -72,4 +84,23 @@
   box-shadow:
     calc(-1 * var(--neo-offset)) calc(-1 * var(--neo-offset)) var(--neo-blur) color-mix(in srgb, var(--neo-light) 40%, transparent),
     var(--neo-offset) var(--neo-offset) var(--neo-blur) color-mix(in srgb, var(--neo-dark) 40%, transparent);
+}
+
+/* Textura de "hoja de cuaderno" para listados tipo log (piloto: Reportes de
+   trazabilidad). Fondo y línea horizontal son decorativos fijos, mismo
+   criterio que --color-superficie (no ligados al tenant); el rojo reusa el
+   mismo fijo de .neo-peligro. La línea vertical de margen sí usa
+   --color-primario para dar acento de marca real. rounded-lg se define en
+   el template (Tailwind), no acá — el radius sigue el cap de estilo-bold-accent. */
+.notebook-sheet {
+  background-color: #fffef4;
+  background-image:
+    linear-gradient(to right, transparent 31px, var(--color-primario) 32px, var(--color-primario) 33px, transparent 34px),
+    linear-gradient(transparent 31px, color-mix(in srgb, #dc2626 25%, transparent) 32px);
+  background-size: 100% 32px;
+  padding-left: 40px;
+}
+
+.notebook-line {
+  min-height: 32px;
 }

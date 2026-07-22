@@ -1,5 +1,4 @@
 import { Component, computed, input, output, signal } from '@angular/core';
-import { Boton } from '../../shared/boton/boton';
 
 // ponytail: vive acá y no en shared/ — hoy es el único consumidor (reportes de
 // trazabilidad). Si un segundo reporte necesita filtro de fecha, recién ahí se
@@ -42,18 +41,31 @@ function capitalizar(texto: string): string {
 
 @Component({
   selector: 'app-calendario-fecha',
-  imports: [Boton],
   template: `
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="flex flex-wrap items-center justify-center gap-2 sm:flex-nowrap sm:justify-between">
+      <button type="button" (click)="irADia(-1)"
+              class="border-black/10 text-primario order-2 flex shrink-0 items-center gap-1.5 rounded-full border bg-black/[0.02] px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-black/5 sm:order-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+        </svg>
+        Día anterior
+      </button>
+
       <button type="button" (click)="toggleCalendario()"
-              class="bg-primario flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors">
+              class="bg-primario order-1 flex w-full items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors sm:order-2 sm:w-auto">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4 shrink-0">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
         </svg>
-        <span class="capitalize">{{ etiquetaFecha() }}</span>
+        <span class="truncate capitalize">{{ etiquetaFecha() }}</span>
       </button>
-      <app-boton variante="secundario" (click)="irADia(-1)">◀ Día anterior</app-boton>
-      <app-boton variante="secundario" (click)="irADia(1)">Día siguiente ▶</app-boton>
+
+      <button type="button" (click)="irADia(1)"
+              class="border-black/10 text-primario order-3 flex shrink-0 items-center gap-1.5 rounded-full border bg-black/[0.02] px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-black/5">
+        Día siguiente
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
     </div>
 
     @if (abierto()) {
